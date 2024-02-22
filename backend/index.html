@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Application</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        #messages { list-style-type: none; padding: 0; }
+        #messages li { padding: 8px; margin-bottom: 2px; background-color: #f3f3f3; }
+        #form { margin-top: 20px; }
+        #input { margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+        <input id="input" autocomplete="off" /><button>Send</button>
+    </form>
+    <button id="incr-btn">Increase Count</button>
+    <p>Session Count: <span id="count">0</span></p>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+        var form = document.getElementById('form');
+        var input = document.getElementById('input');
+        var incrButton = document.getElementById('incr-btn');
+        var countSpan = document.getElementById('count');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('chat message', input.value);
+                input.value = '';
+            }
+        });
+
+        socket.on('chat message', function(msg) {
+            var item = document.createElement('li');
+            item.textContent = msg;
+            document.getElementById('messages').appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        incrButton.addEventListener('click', function() {
+            fetch('/incr', { method: 'POST' })
+                .then(response => response.text())
+                .then(count => {
+                    countSpan.textContent = count;
+                });
+        });
+    </script>
+</body>
+</html>
